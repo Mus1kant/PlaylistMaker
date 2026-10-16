@@ -1,6 +1,5 @@
 package com.example.androidiscool
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.activity.ComponentActivity
@@ -26,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.compose.rememberNavController
 
 
 class MainActivity : ComponentActivity() {
@@ -39,22 +38,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MainScreen(
-                onSearchClick = {
-                    val intent = Intent(
-                        this@MainActivity,
-                        SearchActivity::class.java
-                    )
-                    startActivity(intent)
-                },
+            val navController = rememberNavController()
 
-                onSettingsClick = {
-                    val intent = Intent(
-                        this@MainActivity,
-                        SettingsActivity::class.java
-                    )
-                    startActivity(intent)
-                }
+            PlaylistHost(
+                navController = navController
             )
         }
     }
@@ -78,7 +65,7 @@ fun MainScreen(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(
                 start = 16.dp,
-                top = 20.dp,
+                top = 60.dp,
                 bottom = 24.dp
             )
         )
