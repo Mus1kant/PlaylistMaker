@@ -1,4 +1,4 @@
-package com.example.androidiscool
+package com.example.androidiscool.ui.activity
 
 import android.os.Bundle
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -30,6 +30,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.rememberNavController
+import com.example.androidiscool.ui.navigation.PlaylistHost
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.example.androidiscool.ui.view_model.SearchViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -41,10 +44,14 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             PlaylistHost(
-                navController = navController
+                navController = navController,
+                searchViewModel = searchViewModel
             )
         }
     }
+
+    private val searchViewModel: SearchViewModel by viewModel()
+
 }
 
 @Composable
