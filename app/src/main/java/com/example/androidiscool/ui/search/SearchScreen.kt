@@ -1,5 +1,6 @@
 package com.example.androidiscool.ui.search
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,12 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.androidiscool.R
 import com.example.androidiscool.domain.model.Track
 import com.example.androidiscool.ui.view_model.SearchState
 import com.example.androidiscool.ui.view_model.SearchViewModel
@@ -73,23 +78,33 @@ fun SearchScreen(
                 Text("←", fontSize = 26.sp)
             }
 
-            Text("Поиск", fontSize = 22.sp)
+            Text(
+                text = "Поиск",
+                fontSize = 22.sp
+            )
         }
 
         OutlinedTextField(
             value = text,
+
             onValueChange = { newText ->
                 text = newText
             },
+
             modifier = Modifier.fillMaxWidth(),
+
             placeholder = {
                 Text("Поиск треков")
             },
+
             singleLine = true,
 
             leadingIcon = {
                 TextButton(onClick = submitSearch) {
-                    Text("⌕", fontSize = 26.sp)
+                    Text(
+                        text = "⌕",
+                        fontSize = 26.sp
+                    )
                 }
             },
 
@@ -149,36 +164,38 @@ private fun SearchResults(
         }
 
         is SearchState.Success -> {
-            val tracks = screenState.foundList
+            LazyColumn(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(
+                    items = screenState.foundList,
+                    key = { track -> track.id }
+                ) { track ->
 
-            if (tracks.isEmpty()) {
-                InformerState(
-                    titleText = "Ничего не найдено",
-                    modifier = modifier
-                )
-            } else {
-                LazyColumn(
-                    modifier = modifier,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        items = tracks,
-                        key = { it.id }
-                    ) { track ->
-                        TrackListItem(
-                            track = track,
-                            onClick = {
-                                onTrackClick(track)
-                            }
-                        )
-                    }
+                    TrackListItem(
+                        track = track,
+                        onClick = {
+                            onTrackClick(track)
+                        }
+                    )
                 }
             }
+        }
+
+        SearchState.Empty -> {
+            InformerState(
+                titleText = "Ничего не найдено",
+                imageRes = R.drawable.ic_nothing_found,
+                modifier = modifier
+            )
         }
 
         is SearchState.Fail -> {
             InformerState(
                 titleText = screenState.error,
+                subtitleText = "Проверьте подключение к интернету",
+                imageRes = R.drawable.ic_no_internet,
                 modifier = modifier
             )
         }
@@ -188,16 +205,51 @@ private fun SearchResults(
 @Composable
 private fun InformerState(
     titleText: String,
+    subtitleText: String? = null,
+    imageRes: Int? = null,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+
+        if (imageRes != null) {
+
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = null,
+                modifier = Modifier.size(120.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Spacer(
+                modifier = Modifier.size(16.dp)
+            )
+        }
+
         Text(
             text = titleText,
-            fontSize = 18.sp
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center
         )
+
+        if (subtitleText != null) {
+
+            Spacer(
+                modifier = Modifier.size(8.dp)
+            )
+
+            Text(
+                text = subtitleText,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -211,6 +263,7 @@ private fun TrackListItem(
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = 8.dp),
+
         verticalAlignment = Alignment.CenterVertically
     ) {
 
@@ -223,11 +276,14 @@ private fun TrackListItem(
             tint = Color.Gray
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(
+            modifier = Modifier.width(12.dp)
+        )
 
         Column(
             modifier = Modifier.weight(1f)
         ) {
+
             Text(
                 text = track.trackName,
                 fontSize = 16.sp,
@@ -250,4 +306,34 @@ private fun TrackListItem(
             color = Color.Gray
         )
     }
+}
+
+// Предпросмотр пустого результата
+
+@Preview(
+    name = "Ничего не найдено",
+    showBackground = true
+)
+@Composable
+private fun EmptySearchPreview() {
+    SearchResults(
+        screenState = SearchState.Empty,
+        modifier = Modifier.fillMaxSize(),
+        onTrackClick = {}
+    )
+}
+
+// Предпросмотр ошибки подключения
+
+@Preview(
+    name = "Нет интернета",
+    showBackground = true
+)
+@Composable
+private fun NoInternetPreview() {
+    SearchResults(
+        screenState = SearchState.Fail("Нет интернета"),
+        modifier = Modifier.fillMaxSize(),
+        onTrackClick = {}
+    )
 }

@@ -33,8 +33,7 @@ class SearchViewModel(
                 if (result.isNotEmpty()) {
                     _searchScreenState.value = SearchState.Success(result)
                 } else {
-                    _searchScreenState.value =
-                        SearchState.Fail("Ничего не найдено")
+                    _searchScreenState.value = SearchState.Empty
                 }
 
             } catch (e: CancellationException) {

@@ -12,6 +12,8 @@ sealed class SearchState {
         val foundList: List<Track>
     ) : SearchState()
 
+    object Empty : SearchState()
+
     data class Fail(
         val error: String
     ) : SearchState()
