@@ -161,11 +161,6 @@ fun SettingsScreen(
 }
 
 @Composable
-fun Color(x0: Long) {
-    TODO("Not yet implemented")
-}
-
-@Composable
 fun SettingsItem(
     text: String,
     icon: ImageVector,
