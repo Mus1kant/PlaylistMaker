@@ -1,4 +1,3 @@
-
 package com.example.androidiscool.ui.search
 
 import androidx.compose.foundation.Image
@@ -22,11 +21,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -49,21 +54,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androidiscool.R
 import com.example.androidiscool.domain.model.Track
+import com.example.androidiscool.ui.view_model.SearchError
 import com.example.androidiscool.ui.view_model.SearchState
 import com.example.androidiscool.ui.view_model.SearchViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SearchScreen(
-    searchViewModel: SearchViewModel,
     navigateToDetailScreen: (Track) -> Unit,
     navigateBack: () -> Unit
 ) {
+    val searchViewModel: SearchViewModel = koinViewModel()
     val screenState by searchViewModel.searchScreenState.collectAsState()
-
-    var text by rememberSaveable {
-        mutableStateOf("")
-    }
-
+    var text by rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
     val submitSearch: () -> Unit = {
@@ -73,142 +76,78 @@ fun SearchScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-
-        // Заголовок экрана
-
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            TextButton(onClick = navigateBack) {
-                Text(
-                    text = "←",
-                    fontSize = 26.sp
+            IconButton(onClick = navigateBack) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
                 )
             }
-
             Text(
-                text = "Поиск",
+                text = stringResource(R.string.search_title),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        // Поисковая строка
+        val hint = stringResource(R.string.search_hint)
+        val searchActionDescription = stringResource(R.string.search_action)
+        val clearSearchDescription = stringResource(R.string.clear_search)
 
         BasicTextField(
             value = text,
-
             onValueChange = { newText ->
                 text = newText
-
-                if (newText.isEmpty()) {
-                    searchViewModel.clearSearch()
-                }
+                if (newText.isEmpty()) searchViewModel.clearSearch()
             },
-
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp)
-                .background(
-                    color = Color(0xFFE6E8EB),
-                    shape = RoundedCornerShape(8.dp)
-                ),
-
+                .background(Color(0xFFE6E8EB), RoundedCornerShape(8.dp)),
             singleLine = true,
-
-            textStyle = TextStyle(
-                fontSize = 16.sp,
-                color = Color.Black
-            ),
-
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
-            ),
-
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    submitSearch()
-                }
-            ),
-
+            textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { submitSearch() }),
             decorationBox = { innerTextField ->
-
                 Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 12.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Icon(
-                        painter = painterResource(
-                            id = android.R.drawable.ic_menu_search
-                        ),
-                        contentDescription = "Искать",
+                        imageVector = Icons.Default.Search,
+                        contentDescription = searchActionDescription,
                         tint = Color.Gray,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable {
-                                submitSearch()
-                            }
+                        modifier = Modifier.size(20.dp).clickable { submitSearch() }
                     )
-
-                    Spacer(
-                        modifier = Modifier.width(8.dp)
-                    )
-
-                    Box(
-                        modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                         if (text.isEmpty()) {
-                            Text(
-                                text = "Поиск",
-                                fontSize = 16.sp,
-                                color = Color.Gray
-                            )
+                            Text(text = hint, fontSize = 16.sp, color = Color.Gray)
                         }
-
                         innerTextField()
                     }
-
                     if (text.isNotEmpty()) {
-
                         Icon(
-                            painter = painterResource(
-                                id = android.R.drawable.ic_menu_close_clear_cancel
-                            ),
-                            contentDescription = "Очистить поиск",
+                            imageVector = Icons.Default.Close,
+                            contentDescription = clearSearchDescription,
                             tint = Color.DarkGray,
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clickable {
-                                    text = ""
-                                    searchViewModel.clearSearch()
-                                }
+                            modifier = Modifier.size(20.dp).clickable {
+                                text = ""
+                                searchViewModel.clearSearch()
+                            }
                         )
                     }
                 }
             }
         )
 
-        // Результаты поиска
-
         SearchResults(
             screenState = screenState,
-            modifier = Modifier
-                .weight(1f)
-                .padding(top = 16.dp),
+            modifier = Modifier.weight(1f).padding(top = 16.dp),
             onTrackClick = navigateToDetailScreen
         )
     }
@@ -220,68 +159,37 @@ private fun SearchResults(
     modifier: Modifier = Modifier,
     onTrackClick: (Track) -> Unit
 ) {
-
     when (screenState) {
+        SearchState.Initial -> Unit
+        SearchState.Searching -> Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) { CircularProgressIndicator() }
 
-        SearchState.Initial -> {
-            // До первого поиска список пустой
-        }
-
-        SearchState.Searching -> {
-
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        is SearchState.Success -> LazyColumn(modifier = modifier.fillMaxSize()) {
+            items(items = screenState.foundList, key = { it.id }) { track ->
+                TrackListItem(track = track, onClick = { onTrackClick(track) })
+                HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFD9DDE2))
             }
         }
 
-        is SearchState.Success -> {
-
-            LazyColumn(
-                modifier = modifier.fillMaxSize()
-            ) {
-
-                items(
-                    items = screenState.foundList,
-                    key = { track -> track.id }
-                ) { track ->
-
-                    TrackListItem(
-                        track = track,
-                        onClick = {
-                            onTrackClick(track)
-                        }
-                    )
-
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = Color(0xFFD9DDE2)
-                    )
-                }
-            }
-        }
-
-        SearchState.Empty -> {
-
-            InformerState(
-                titleText = "Ничего не найдено",
-                imageRes = R.drawable.ic_nothing_found,
-                modifier = modifier
-            )
-        }
+        SearchState.Empty -> InformerState(
+            titleText = stringResource(R.string.search_nothing_found),
+            imageRes = R.drawable.ic_nothing_found,
+            modifier = modifier
+        )
 
         is SearchState.Fail -> {
-
+            val networkFailure = screenState.reason == SearchError.NETWORK
             InformerState(
-                titleText = screenState.error,
-                subtitleText = if (
-                    screenState.error == "Нет интернета"
-                ) {
-                    "Проверьте подключение к интернету"
+                titleText = stringResource(
+                    if (networkFailure) R.string.search_no_internet
+                    else R.string.search_error_title
+                ),
+                subtitleText = if (networkFailure) {
+                    stringResource(R.string.search_check_internet)
                 } else {
-                    null
+                    stringResource(R.string.search_generic_error)
                 },
                 imageRes = R.drawable.ic_no_internet,
                 modifier = modifier
@@ -290,8 +198,6 @@ private fun SearchResults(
     }
 }
 
-
-
 @Composable
 private fun InformerState(
     titleText: String,
@@ -299,39 +205,26 @@ private fun InformerState(
     imageRes: Int,
     modifier: Modifier = Modifier
 ) {
-
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = null,
             modifier = Modifier.size(120.dp),
             contentScale = ContentScale.Fit
         )
-
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = titleText,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-
         if (subtitleText != null) {
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = subtitleText,
                 fontSize = 14.sp,
@@ -342,50 +235,29 @@ private fun InformerState(
     }
 }
 
-
-
 @Composable
-private fun TrackListItem(
-    track: Track,
-    onClick: () -> Unit
-) {
-
+private fun TrackListItem(track: Track, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = 12.dp),
-
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-
-        // Иконка музыки без дополнительных ресурсов
-
         Box(
             modifier = Modifier
                 .size(45.dp)
-                .border(
-                    width = 1.dp,
-                    color = Color.Gray,
-                    shape = RoundedCornerShape(3.dp)
-                ),
+                .border(1.dp, Color.Gray, RoundedCornerShape(3.dp)),
             contentAlignment = Alignment.Center
         ) {
-
-            Text(
-                text = "♫",
-                fontSize = 28.sp,
-                color = Color.DarkGray
+            Icon(
+                imageVector = Icons.Default.MusicNote,
+                contentDescription = null,
+                tint = Color.DarkGray
             )
         }
-
-        // Название трека и исполнитель
-
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = track.trackName,
                 fontSize = 16.sp,
@@ -393,11 +265,7 @@ private fun TrackListItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = track.artistName,
                 fontSize = 12.sp,
@@ -406,45 +274,18 @@ private fun TrackListItem(
                 overflow = TextOverflow.Ellipsis
             )
         }
-
-
-
-        Text(
-            text = track.trackTime,
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Text(text = track.trackTime, fontSize = 12.sp, color = Color.Gray)
     }
 }
 
-
-
-@Preview(
-    name = "Ничего не найдено",
-    showBackground = true
-)
+@Preview(showBackground = true)
 @Composable
 private fun EmptySearchPreview() {
-
-    SearchResults(
-        screenState = SearchState.Empty,
-        modifier = Modifier.fillMaxSize(),
-        onTrackClick = {}
-    )
+    SearchResults(SearchState.Empty, Modifier.fillMaxSize(), onTrackClick = {})
 }
 
-
-
-@Preview(
-    name = "Нет интернета",
-    showBackground = true
-)
+@Preview(showBackground = true)
 @Composable
 private fun NoInternetPreview() {
-
-    SearchResults(
-        screenState = SearchState.Fail("Нет интернета"),
-        modifier = Modifier.fillMaxSize(),
-        onTrackClick = {}
-    )
+    SearchResults(SearchState.Fail(SearchError.NETWORK), Modifier.fillMaxSize(), onTrackClick = {})
 }

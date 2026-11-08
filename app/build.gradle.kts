@@ -37,6 +37,7 @@ android {
 
 dependencies {
     implementation("io.insert-koin:koin-android:4.1.1")
+    implementation("io.insert-koin:koin-androidx-compose:4.1.1")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1")
     implementation(libs.androidx.material3)
