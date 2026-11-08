@@ -1,5 +1,4 @@
-
-package com.example.androidiscool.data.network
+package com.example.androidiscool.data.repository
 
 import com.example.androidiscool.data.NetworkClient
 import com.example.androidiscool.data.dto.TracksSearchRequest
@@ -11,10 +10,9 @@ import com.example.androidiscool.domain.model.Track
 import kotlinx.coroutines.delay
 
 class TracksRepositoryImpl(
-    private val networkClient: NetworkClient
+    private val networkClient: NetworkClient,
+    private val storage: Storage
 ) : TracksRepository {
-
-    private val storage = Storage()
 
     override suspend fun searchTracksContains(
         expression: String

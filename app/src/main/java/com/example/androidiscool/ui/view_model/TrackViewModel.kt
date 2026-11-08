@@ -6,6 +6,7 @@ import com.example.androidiscool.domain.api.TrackSearchInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TrackViewModel(
@@ -21,7 +22,7 @@ class TrackViewModel(
     init {
         viewModelScope.launch {
             tracksInteractor.loadSomeData()
-            _loadingStateFlow.value = false
+            _loadingStateFlow.update { false }
         }
     }
 }

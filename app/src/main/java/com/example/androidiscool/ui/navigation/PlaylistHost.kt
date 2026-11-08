@@ -10,7 +10,6 @@ import com.example.androidiscool.domain.model.Track
 import com.example.androidiscool.ui.activity.MainScreen
 import com.example.androidiscool.ui.search.DetailsScreen
 import com.example.androidiscool.ui.search.SearchScreen
-import com.example.androidiscool.ui.view_model.SearchViewModel
 import com.google.gson.Gson
 
 enum class Screen(val route: String) {
@@ -22,8 +21,7 @@ enum class Screen(val route: String) {
 
 @Composable
 fun PlaylistHost(
-    navController: NavHostController,
-    searchViewModel: SearchViewModel
+    navController: NavHostController
 ) {
 
     val gson = Gson()
@@ -56,8 +54,6 @@ fun PlaylistHost(
         // Экран поиска
         composable(Screen.SEARCH.route) {
             SearchScreen(
-                searchViewModel = searchViewModel,
-
                 navigateToDetailScreen = { track ->
                     val trackJson = gson.toJson(track)
 

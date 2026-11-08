@@ -7,12 +7,12 @@ import com.example.androidiscool.domain.model.Track
 class TrackSearchInteractorImpl(
     private val repository: TracksRepository
 ) : TrackSearchInteractor {
+    override suspend fun searchTracksContains(expression: String): List<Track> =
+        repository.searchTracksContains(expression)
 
-    override fun searchTracks(expression: String): List<Track> {
-        return repository.searchTracks(expression)
-    }
+    override fun searchTracks(expression: String): List<Track> =
+        repository.searchTracks(expression)
 
-    override suspend fun loadSomeData(): List<Track> {
-        return repository.loadSomeData()
-    }
+    override suspend fun loadSomeData(): List<Track> =
+        repository.loadSomeData()
 }

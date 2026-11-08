@@ -29,4 +29,12 @@
 
     <string name="dark_theme">Тёмная тема</string>
 
+    <string name="search_nothing_found">Ничего не найдено</string>
+    <string name="search_no_internet">Нет интернета</string>
+    <string name="search_check_internet">Проверьте подключение к интернету</string>
+    <string name="search_error_title">Ошибка поиска</string>
+    <string name="search_generic_error">Попробуйте повторить поиск</string>
+    <string name="track_artist_label">Исполнитель: %1$s</string>
+    <string name="track_duration_label">Длительность: %1$s</string>
+    <string name="no_app_available">Нет приложения для выполнения действия</string>
 </resources>

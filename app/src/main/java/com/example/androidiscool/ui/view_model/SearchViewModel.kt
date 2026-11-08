@@ -2,16 +2,20 @@ package com.example.androidiscool.ui.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.androidiscool.domain.api.TracksRepository
+import com.example.androidiscool.domain.api.TrackSearchInteractor
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SearchViewModel(
-    private val trackRepository: TracksRepository
+    private val trackSearchInteractor: TrackSearchInteractor
 ) : ViewModel() {
 
     private val _searchScreenState =
@@ -22,27 +26,28 @@ class SearchViewModel(
     private var searchJob: Job? = null
 
     fun searchTracks(query: String) {
-
         searchJob?.cancel()
+        if (query.isBlank()) {
+            _searchScreenState.update { SearchState.Initial }
+            return
+        }
 
         searchJob = viewModelScope.launch(Dispatchers.IO) {
-            _searchScreenState.value = SearchState.Searching
+            _searchScreenState.update { SearchState.Searching }
 
             try {
-                val result = trackRepository.searchTracksContains(query)
-
-                if (result.isNotEmpty()) {
-                    _searchScreenState.value = SearchState.Success(result)
-                } else {
-                    _searchScreenState.value = SearchState.Empty
+                val tracks = trackSearchInteractor.searchTracksContains(query.trim())
+                currentCoroutineContext().ensureActive()
+                _searchScreenState.update {
+                    if (tracks.isEmpty()) SearchState.Empty
+                    else SearchState.Success(tracks)
                 }
-
             } catch (e: CancellationException) {
                 throw e
-
+            } catch (e: IOException) {
+                _searchScreenState.update { SearchState.Fail(SearchError.NETWORK) }
             } catch (e: Exception) {
-                _searchScreenState.value =
-                    SearchState.Fail("Ошибка при поиске: ${e.message}")
+                _searchScreenState.update { SearchState.Fail(SearchError.UNKNOWN) }
             }
         }
     }
@@ -50,6 +55,6 @@ class SearchViewModel(
     fun clearSearch() {
         searchJob?.cancel()
         searchJob = null
-        _searchScreenState.value = SearchState.Initial
+        _searchScreenState.update { SearchState.Initial }
     }
 }
